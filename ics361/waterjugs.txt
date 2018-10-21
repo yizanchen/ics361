@@ -1,0 +1,62 @@
+(defparameter *moves* '(filla fillb emptya emptyb 3to5 5to3))
+;;The fill action which will fill up the 5 gallons jug. The condition if the jug is not already full.
+(defun filla(state)
+	(cond ((< (car state)5 )  (cons '5 (cdr state)))
+	(t nil)))
+
+;;Fill action for the 3 gallons jug, the condition is also if the jug is not already full yet.
+(defun fillb(state)
+	(cond ((< (cadr state)3 ) (list (car state) '3 ))
+	(t nil)))
+
+;;empty action for the 5 gallons jug, which will empty the jug and set it value to 0 in the list.
+;;condition is the jug is not already empty
+(defun emptya(state)
+	(cond (( > (car state) 0) (cons '0 (cdr state) ))
+	(t nil)))
+
+;;empty action for the 3 gallons jug, which will empty the jug and set it value to 0 in the list.
+;;condition is the jug is not already empty
+(defun emptyb(state)
+	(cond (( > (cadr state) 0) (list  (car state) '0  ) )
+	(t nil)))
+
+;;the pour action for the 5 gallons jug pouring into the 3 gallons jug, updating value for the action
+;;conidtion that the 5 gallons jug can't be empty(nothing to pour), the 3 gallons jug can't be full(can't pour into a full jug)
+(defun 5to3(state)
+	(cond
+	( (= (car state)0) nil)
+	( (= (cadr state)3) nil)
+	( (>= (- 3 (+ (car state) (cadr state))) 0) (list '0 (+ (car state) (cadr state)))) 
+	( t ( list (- (car state) (- '3 (cadr state))) '3))
+	))
+
+;;the pour action for the 3 gallons jug pouring into the 5 gallons jug, update value for both atom in the list
+;;conidtion that the 3 gallons jug can't be empty(nothing to pour), the 5 gallons jug can't be full(can't pour into a full jug)
+(defun 3to5(state)
+	(cond
+	( (= (car state)5) nil)
+	( (= (cadr state)0) nil)
+	( (>= (- 5 (+ (car state) (cadr state))) 0) (list (+ (car state) (cadr state)) '0 ))
+	( t   (list '5 ( - (cadr state) (- 5 (car state)) )))
+	))
+
+(run-best '(0 0) '(4 0) )
+first nodes in open:((0 0) NIL 0 1)
+first nodes in open:((5 0) (0 0) 1 2)
+first nodes in open:((0 3) (0 0) 1 3)
+first nodes in open:((3 0) (0 3) 2 3)
+first nodes in open:((2 3) (5 0) 2 4)
+first nodes in open:((5 3) (5 0) 2 4)
+first nodes in open:((2 0) (2 3) 3 4)
+first nodes in open:((3 3) (3 0) 3 5)
+first nodes in open:((0 2) (2 0) 4 6)
+first nodes in open:((5 1) (3 3) 4 6)
+first nodes in open:((5 2) (0 2) 5 7)
+first nodes in open:((0 1) (5 1) 5 7)
+first nodes in open:((4 3) (5 2) 6 7)
+first nodes in open:((1 0) (0 1) 6 7)
+first nodes in open:((4 0) (4 3) 7 7)
+Length of open:2
+Length of closed:15
+solution path:((0 0) (5 0) (2 3) (2 0) (0 2) (5 2) (4 3) (4 0))

@@ -1,0 +1,57 @@
+;;;;This is for the 8 puzzle, the puzzle by a list, for example, (1 2 3 4 5 6 7 8 0) is (1 2 3   where the 0 is the blank square. 
+											 4 5 6
+											 7 8 0)
+;;;;There are 4 moves for this puzzle, moving the blank square, which is 0 in this case, up ,down ,right and left. Which is switching location with the block in that number.
+;;;;So each move take a state and produce the end state matching the result of the moves in the game as a list state. 
+
+
+;; the loca variable is to store the location index for the 0 which is the blank block.
+;; and the moves variable store the 4 different moves, path is solution path and count is the counter for iteration
+(defparameter *loca* 0 )
+(defparameter *moves* '(up down left right))
+(defparameter *path*  '() )							
+(defparameter *count* 0)
+
+;;This function will take the state and return the location index of the 0(blank block).
+(defun zp(state)
+       (setf *loca* (position '0 state)))
+
+;;This function is the move up, it work by setting the -3 index location of the blank block to 0 meaning 0 move up to that place and making the original 0 position to the
+;;value of the switched number. It call the zp function because we need to store the location of the 0 in a variable or it will get lost during the switching placing.
+;;and the condition for the function is that the 0 can't be in the (0 1 2) index which mean it is at the first roll, which you can't move up.
+(defun up(state)
+    (zp state)
+    (cond
+        ( (eq (member *loca* '(0 1 2)) nil) (setf (nth (position '0 state) state) (nth(- (position '0 state) 3)state) ) 
+                                         (setf (nth(- *loca* 3)state) '0) state ) 
+        (t nil)))
+
+;;This function is the move up, it work by setting the +3 index location of the blank block to 0 meaning 0 move down to that place and making the original 0 position to the
+;;value of the switched number. It call the zp function because we need to store the location of the 0 in a variable or it will get lost during the switching placing.
+;;and the condition for the function is that the 0 can't be in the (6 7 8) index which mean it is at the third roll, which you can't move down.
+(defun down(state)
+    (zp state)
+    (cond
+        ( (eq (member *loca* '(6 7 8)) nil)  (setf (nth (position '0 state) state) (nth(+ (position '0 state) 3)state) ) 
+                                             (setf (nth(+ *loca* 3)state) '0) state)
+        (t nil)))
+
+;;This function is the move left, it work by setting the -1 index location of the blank block to 0 meaning 0 move left to that place and making the original 0 position to the
+;;value of the switched number. It call the zp function because we need to store the location of the 0 in a variable or it will get lost during the switching placing.
+;;and the condition for the function is that the 0 can't be in the (0 3 6) index which mean it is at the third column, which you can't move left.
+(defun left(state)
+     (zp state)
+     (cond
+        ( (eq (member *loca* '(0 3 6)) nil)  (setf (nth (position '0 state) state) (nth(- (position '0 state) 1)state) ) 
+                                             (setf (nth(- *loca* 1)state) '0) state)
+        (t nil)))
+
+;;This function is the move right,it work by setting the +1 index location of the blank block to 0 meaning 0 move right to that place and making the original 0 position to the
+;;value of the switched number. It call the zp function because we need to store the location of the 0 in a variable or it will get lost during the switching placing.
+;;and the condition for the function is that the 0 can't be in the (2 5 8) index which mean it is at the third roll, which you can't move right.
+(defun right(state)
+   (zp state)
+    (cond
+        ( (eq (member *loca* '(2 5 8)) nil)  (setf (nth (position '0 state) state) (nth(+ (position '0 state) 1)state) ) 
+                                             (setf (nth(+ *loca* 1)state) '0) state)
+     (t nil)))

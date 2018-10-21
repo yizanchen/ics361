@@ -1,0 +1,62 @@
+(defparameter *state* '(1 2 3 4 5 6 7 8 0))
+
+(print *state*)
+(print (position '0 *state*))
+(print (nth 8 *state*))
+
+
+
+(defun froll()
+       (cons (car *state*) (list (cadr *state*) (caddr *state*) )))
+(defun troll()
+       (cdddr (cdddr *state*)))
+(defun fcol()
+       (cons (car *state*) (list (cadddr *state*) (car (troll)) )))
+(defun tcol()
+       (cons (caddr *state*) (list (cadddr (cddr *state*) ) (caddr (troll)))))
+
+(defparameter *thing* '((1 1) (2 2) (3 3) (4 4)))
+
+(defun sea (list1 goal)
+	(cond 
+		((NIL list1) NIL))
+		((equal (car list1) goal) (format t "found"))
+		(t (sea (rest(list1)) goal)))
+
+(sea *thing* (3 3))
+
+(defparameter *thing* '((1 1) (2 2) (3 3) (4 4)))
+
+(print (equal '(1 1) (first *thing*)))
+(print (cadddr *thing*))
+
+(defparameter *thing* '((1 1) (2 2) (3 3) (4 4)))
+
+(defun sea (list1 goal)
+
+(defparameter *thing* '((1 1) (2 2) (3 3) (4 4)))
+
+(defun check (goal list2)
+	(print (equal goal (car list2))))
+
+
+(defparameter *moves* '(add))
+
+(defun add(a b)
+	(+ a b ))
+
+(defun doso(a b)
+	(print ( add a b) ))
+
+
+(print (add 2 2))
+(print (doso 3 3))
+(print (cons (funcall (car *moves*)4 4 ) '(maybe) ))
+
+(defun makeone( a )
+	(print (cons (- (car a) 1 ) (rest a)  )))
+	
+
+(makeone '(2 2))
+
+(format t "who ~a~% I know ~a~% don~a~% " '(a b c) '(oh) 'swd)

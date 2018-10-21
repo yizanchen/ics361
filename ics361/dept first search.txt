@@ -1,0 +1,105 @@
+(defparameter *open* '( ) )
+(defparameter *closed* '( ) )
+(defparameter *solutionpath* '( ) )
+(defparameter *moves* '( ) )
+
+(defun startDeptfs(start goal)
+	(setq *open* start)
+	(setq *closed* Nil)
+	(setq *solutionpath* start)
+	(deptfirst goal ))
+
+(defun deptfirst (goal )
+	(cond
+	((NULL *open*) NIL)
+	(t (let ((state (car *open)))
+		(cond 
+		((equal state *goal*) (format t "Length of Closed:~a~% Length of Open:~a~% Solution Path:~a~% "    
+						  (Length *closed*) (Length *open*) *solutionpath*))
+                   (t (setq *closed* (cons state *closed*))
+                      (setq *open* (append (makemoves state *moves*) (cdr *open*)))
+                      ((deptfirst goal) )))))))
+
+(defun makesmoves (state moves)
+	(cond 
+	((NULL moves) Nil)
+	(t (let ((child (funcall (car moves) state)) (rest (makemoves state (cdr moves))))
+		(loop for state in child
+		do (
+		
+
+
+https://www.cs.unm.edu/~luger/ai-final/code/LISP.breadth1.html
+
+(defparameter *moves* '(take1 take2 take3))
+(defparameter *path*  '() )
+(defun take1(state)
+	(check (cond
+	((eq (car state) 0) nil)
+	(t ( cons (-(car state)1) (rest state))))))
+
+(defun take2(state)
+	(check(cond
+	((eq (cadr state) 0) nil)
+	(t ( list (car state) (-(cadr state)1) (caddr state))))))
+
+(defun take3(state)
+	(check(cond
+	((eq (caddr state) 0) nil)
+	(t ( list (car state) (cadr state) (-(caddr state)1) )))))
+
+(defun check (state)
+	(cond
+	((equal state '(0 1 1)) nil)
+	(t state )))
+
+
+(defun run-breadth (start goal)
+  (declare (special *open*)
+           (special *closed*)
+           (special *goal*))
+  (setq *open* (list start))
+  (setq *closed* nil)
+  (setq *goal* goal)
+  (breadth-first))
+
+
+(defun breadth-first ()
+  (declare (special *open*)
+           (special *closed*)
+           (special *goal*)
+           (special *moves*))
+  (cond ((null *open*) nil)
+        (t (let ((state (car *open*)))
+             (cond ((equal state *goal*)(setq *path* (cons state *path*)) (format t "Length of Closed:~a~%Length of Open:~a~%Solution path:~a~%  "    
+						  (Length *closed*) (Length *open*)(reverse *path*) )) 
+                   (t (format t "first open list~a~%" (car *open*))(setq *path* (cons state *path*)) (setq *closed* (cons state *closed*))
+                      (setq *open* 
+                            (append (cdr *open*)
+                                    (generate-descendants state *moves*)))
+                      (breadth-first)))))))
+
+(defun generate-descendants (state moves)
+  (declare (special *open*)
+           (special *closed*))
+  (cond ((null moves) nil)
+        (t (let ((child (funcall (car moves) state))
+                 (rest (generate-descendants state (cdr moves))))
+             (cond ((null child) rest)
+                   ((member child rest :test #'equal) rest)
+                   ((member child *open* :test #'equal) rest)
+                   ((member child *closed* :test #'equal) rest)
+                   (t (cons child rest)))))))
+
+
+
+
+
+
+(defun take2 (state)
+	(list
+	(cons (-( caar state)1) (cdar state))
+	(cons (+(caadr state)1) (cdadr state)) ))
+
+(defun take1 (state)
+	(cons (-( caar state)1) (cdar state)))

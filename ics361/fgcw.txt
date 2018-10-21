@@ -1,0 +1,66 @@
+(defparameter *moves* '(getself takeself takewolf getwolf takegoat getgoat takecabbage getcabbage))
+(defun getself(state)
+	(check (cond
+	((eq (caar state)1) nil)
+	(t (list (cons (+(caar state)1) (cdar state))
+		 (cons (-(caadr state)1) (cdadr state)) )))))
+(defun takeself(state)
+	(check (cond
+	((eq (caar state)0) nil)
+	(t (list (cons (-(caar state)1) (cdar state))
+                 (cons (+(caadr state)1) (cdadr state)))))))
+(defun getwolf(state)
+	(check (cond
+	((or (eq (caar state)1) (eq (cadar state) 1)) nil)
+	(t(list (cons (+(caar state)1) (cons (+(cadar state)1) (cddar state)))
+		(cons (-(caadr state)1)(cons (-(cadadr state)1) (cddadr state)))  )))))
+(defun takewolf(state)								
+	(check (cond
+	((or (eq (caar state)0) (eq (cadar state) 0)) nil)
+	(t(list (cons (-(caar state)1) (cons (-(cadar state)1) (cddar state)))
+		(cons (+(caadr state)1)(cons (+(cadadr state)1) (cddadr state)))  )))))
+(defun takegoat(state)
+	(check(cond
+	((or (eq (caar state) 0) (eq (caddar state) 0)) nil)
+	(t(list (cons (-(caar state)1) (cons (cadar state) (cons (-(caddar state)1) (cdddr(car state)))))
+	        (cons (+(caadr state)1) (cons (cadadr state) (cons (+(caddar(cdr state))1) (cdddr (cadr state)))))  )))))
+(defun getgoat(state)
+	(check(cond
+	((or (eq (caar state) 1) (eq (caddar state) 1)) nil)
+	(t(list (cons (+(caar state)1) (cons (cadar state) (cons (+(caddar state)1) (cdddr(car state)))))
+	        (cons (-(caadr state)1) (cons (cadadr state) (cons (-(caddar(cdr state))1) (cdddr (cadr state)))))  )))))
+(defun takecabbage(state)
+	(check(cond
+	((or (eq (caar state)0) (eq (cadddr(car state )) 0)) nil)
+	(t(list (cons (-(caar state)1) (cons (cadar state) (list (caddar state) (-(cadddr(car state))1 ))))
+	        (cons (+(caadr state)1) (cons (cadadr state) (list (caddar(cdr state)) (+(cadddr (cadr state))1 ))))  )))))
+(defun getcabbage(state)
+	(check(cond
+	((or (eq (caar state)1) (eq (cadddr(car state )) 1)) nil)
+	(t(list (cons (+(caar state)1) (cons (cadar state) (list (caddar state) (+(cadddr(car state))1 ))))
+	        (cons (-(caadr state)1) (cons (cadadr state) (list (caddar(cdr state)) (-(cadddr (cadr state))1 ))))  )))))
+(defun check (state)
+	(cond
+	((and (equal (find '(0 0 1 1)  state :test #'equal ) nil )
+	      (equal (find '(0 1 1 1)  state :test #'equal ) nil )
+	      (equal (find '(0 1 1 0)  state :test #'equal ) nil )   ) state )
+	(t nil )))
+
+
+(run-best '((1 1 1 1)(0 0 0 0)) '((0 0 0 0)(1 1 1 1)))
+first nodes in open:(((1 1 1 1) (0 0 0 0)) NIL 0 2)
+first nodes in open:(((0 1 0 1) (1 0 1 0)) ((1 1 1 1) (0 0 0 0)) 1 3)
+first nodes in open:(((1 1 0 1) (0 0 1 0)) ((0 1 0 1) (1 0 1 0)) 2 4)
+first nodes in open:(((0 1 0 0) (1 0 1 1)) ((1 1 0 1) (0 0 1 0)) 3 5)
+first nodes in open:(((0 0 0 1) (1 1 1 0)) ((1 1 0 1) (0 0 1 0)) 3 5)
+first nodes in open:(((1 1 1 0) (0 0 0 1)) ((0 1 0 0) (1 0 1 1)) 4 6)
+first nodes in open:(((1 0 1 1) (0 1 0 0)) ((0 0 0 1) (1 1 1 0)) 4 6)
+first nodes in open:(((0 0 1 0) (1 1 0 1)) ((1 1 1 0) (0 0 0 1)) 5 7)
+first nodes in open:(((1 0 1 0) (0 1 0 1)) ((0 0 1 0) (1 1 0 1)) 6 8)
+first nodes in open:(((0 0 0 0) (1 1 1 1)) ((1 0 1 0) (0 1 0 1)) 7 7)
+Length of open:1
+Length of closed:10
+solution path:
+(((1 1 1 1) (0 0 0 0)) ((0 1 0 1) (1 0 1 0)) ((1 1 0 1) (0 0 1 0))
+ ((0 1 0 0) (1 0 1 1)) ((1 1 1 0) (0 0 0 1)) ((0 0 1 0) (1 1 0 1))
+ ((1 0 1 0) (0 1 0 1)) ((0 0 0 0) (1 1 1 1)))

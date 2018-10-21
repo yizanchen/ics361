@@ -1,0 +1,224 @@
+;;;;This for the FWGC puzzle, I represent each state with a list. Farmer is the first atom in list, Wolf is second atom in the list, Goat is the third atom in the list, Cabbage is the last atom in the list.
+And I represent two side of the river with two lists and using 1 to represent their present in their location and 0 if they are not present. For example, the state state is
+((1 1 1 1)(0 0 0 0)), in here the 4 1s in the first list each represent the Farmer, wolf, goat and cabbage with their position in the list. And the second list with 4 0s represent
+the Farmer, Wolf, Goat and cabbage are not present on the other side of the river. So, our goal state is ((0 0 0 0)(1 1 1 1)), which mean every one is at the other side of the river.
+So, when we input our state state and end state to begin the search, the start state will be the current state and child state will generate using the legal moves from the puzzle.
+The moves are listed in the *moves* and each of them represent a action in the puzzle. After the child state are gererated, it will check to if the goal state is satisfie, else it will 
+keep performing moves to generate more child and search for the goal state. There are also, some dead state, each time a child is generate, it will check if the child is a dead state 
+and return nil if child is a dead state. 
+
+
+;;define world variable to store moves, solution path and a counter for iteration. Moves are setted variable, so no change will be made and it will be call later in the code to generate child.
+;;Path is path solution, each time a legal state is found, it will add to the path, creating a solution path.
+;;count will increase by 1 for each time the first state in open list is check with the goal state, keeping track of iteration.
+(defparameter *moves* '(getself takeself takewolf getwolf takegoat getgoat takecabbage getcabbage))				
+(defparameter *path*  '() )							
+(defparameter *count* 0)	
+
+;;A move function represent the farmer return form the other side of the river alone, so it will add 1 to the first atom in first list, meaning farmer present in the one side on the river
+;;and it will minus 1 from the other side of the river, which represent by the first atom in the second list, since the farmer is going back alone, so he should not present in the other side of the river.
+;;function will not run if farmer is on the left side of the river, since it is not possible to go back to the left if he is already in the left side. This is done with checking if 
+;;the first atom in the first list is 1. And after the math is done, it will combine back to become a readable state, "list" and "cons" in the second part of the code.
+;;In the function it also check if this will generate a dead state, which what the "check" before "cond" is, it is a function that check for dead state, it is in the later part of the code. 
+(defun getself(state)
+	(check (cond
+	((eq (caar state)1) nil)
+	(t (list (cons (+(caar state)1) (cdar state))
+		 (cons (-(caadr state)1) (cdadr state)) )))))
+
+;;A move function represent the farmer acrossing the river alone, so minus one in the first atom in the first list. Add one to the first atom in the second list.
+;;also check if farmer exist on the left side of river, dead state, combine together to form reabable state at the end.
+(defun takeself(state)
+	(check (cond
+	((eq (caar state)0) nil)
+	(t (list (cons (-(caar state)1) (cdar state))
+                 (cons (+(caadr state)1) (cdadr state)))))))
+
+;;A move function represent the farmer taking the wolf back from the right side of the river, add one in both farmer and wolf location of the left list and minus one in the second list.
+;;Also check if farmer and wolf exist on same side of the right side river, dead state, combine together to form reabable state at the end
+(defun getwolf(state)
+	(check (cond
+	((or (eq (caar state)1) (eq (cadar state) 1)) nil)
+	(t(list (cons (+(caar state)1) (cons (+(cadar state)1) (cddar state)))
+		(cons (-(caadr state)1)(cons (-(cadadr state)1) (cddadr state)))  )))))
+
+;;A move funtion represent the farmer crossing the river with the wolf from left side of the river to the right side. So minus one in both farmer and wolf location of the left list and minus one in the second list.
+;;Also check if farmer and wolf exist on same side of the left side river, dead state, combine together to form reabable state at the end.
+(defun takewolf(state)								
+	(check (cond
+	((or (eq (caar state)0) (eq (cadar state) 0)) nil)
+	(t(list (cons (-(caar state)1) (cons (-(cadar state)1) (cddar state)))
+		(cons (+(caadr state)1)(cons (+(cadadr state)1) (cddadr state)))  )))))
+
+;;A move function represent the farmer crossing the river with goat, so change status on their location.
+;;check for exist on same side, dead state, combine together to form reabable state at the end.
+(defun takegoat(state)
+	(check(cond
+	((or (eq (caar state) 0) (eq (caddar state) 0)) nil)
+	(t(list (cons (-(caar state)1) (cons (cadar state) (cons (-(caddar state)1) (cdddr(car state)))))
+	        (cons (+(caadr state)1) (cons (cadadr state) (cons (+(caddar(cdr state))1) (cdddr (cadr state)))))  )))))
+
+;;A move function represent the farmer returning the river with goat, so change status on their location.
+;;check for exist on same side, dead state, combine together to form reabable state at the end.
+(defun getgoat(state)
+	(check(cond
+	((or (eq (caar state) 1) (eq (caddar state) 1)) nil)
+	(t(list (cons (+(caar state)1) (cons (cadar state) (cons (+(caddar state)1) (cdddr(car state)))))
+	        (cons (-(caadr state)1) (cons (cadadr state) (cons (-(caddar(cdr state))1) (cdddr (cadr state)))))  )))))
+
+;;A move function represent the farmer crossing the river with cabbage, so change status on their location.
+;;check for exist on same side, dead state, combine together to form reabable state at the end.
+(defun takecabbage(state)
+	(check(cond
+	((or (eq (caar state)0) (eq (cadddr(car state )) 0)) nil)
+	(t(list (cons (-(caar state)1) (cons (cadar state) (list (caddar state) (-(cadddr(car state))1 ))))
+	        (cons (+(caadr state)1) (cons (cadadr state) (list (caddar(cdr state)) (+(cadddr (cadr state))1 ))))  )))))
+
+;;A move function represent the farmer returning the river with cabbage, so change status on their location.
+;;check for exist on same side, dead state, combine together to form reabable state at the end.
+(defun getcabbage(state)
+	(check(cond
+	((or (eq (caar state)1) (eq (cadddr(car state )) 1)) nil)
+	(t(list (cons (+(caar state)1) (cons (cadar state) (list (caddar state) (+(cadddr(car state))1 ))))
+	        (cons (-(caadr state)1) (cons (cadadr state) (list (caddar(cdr state)) (-(cadddr (cadr state))1 ))))  )))))
+
+;;A function to check if the state is legal, to prevent goat eat cabbage and wolf eat goat. 
+;;it will check for these dead position in both side of the list in a state, meaning either of the river can't have goat eat caabage or wolf eat goat.
+;;return the state if it don't have any of the dead poistion and return nil, which will cancel the state if state is dead.
+(defun check (state)
+	(cond
+	((and (equal (find '(0 0 1 1)  state :test #'equal ) nil )
+	      (equal (find '(0 1 1 1)  state :test #'equal ) nil )
+	      (equal (find '(0 1 1 0)  state :test #'equal ) nil )   ) state )
+	(t nil )))
+
+;;code from https://www.cs.unm.edu/~luger/ai-final/code/LISP.breadth1.html
+;;Function to generate child state from current state, take the speical variable open list and closed list.
+;;check if moves is empty, if not use "funcall" to do moves function on the state, and set child to be result of the moves function
+;;And then calling itself recursively with the next moves and until all moves are used up by check if moves list is empty and setting rest to that result state.
+;;Then it will check if child is in the rest(two same state create by different moves),child already exist in open list, child exist in closed list and combine child and rest if all are false.
+(defun generate-descendants (state moves)
+  (declare (special *open*)
+           (special *closed*))
+  (cond ((null moves) nil)
+        (t (let ((child (funcall (car moves) state))
+                 (rest (generate-descendants state (cdr moves))))
+             (cond ((null child) rest)
+                   ((member child rest :test #'equal) rest)
+                   ((member child *open* :test #'equal) rest)
+                   ((member child *closed* :test #'equal) rest)
+                   (t (cons child rest)))))))
+
+;;code from https://www.cs.unm.edu/~luger/ai-final/code/LISP.breadth1.html, modification done.
+;;Function that start the Dept-frist-search by take the start state and goal state, also taking speical variable open list and closed list and goal.
+;;put start state into open list, goal state into goal and run the dept-first function to start the search.
+(defun run-dept (start goal)
+  (declare (special *open*)
+           (special *closed*)
+           (special *goal*))
+  (setq *open* (list start))
+  (setq *closed* nil)
+  (setq *goal* goal)
+  (dept-first))
+
+;;code from https://www.cs.unm.edu/~luger/ai-final/code/LISP.breadth1.html, modification done.
+;;the dept-first-search function,take speical variable open,closed,goal,and moves
+;;check if open list is empty, make current state the first state in open list.
+;;print out the iteration information and also setting count to increase by 1
+;;check if current state is goal state, if match, print the information (length of open and closed and solution path)
+;;if not,add current state to solution path, also in the closed list
+;;add child of the current state in the head of open list, recursively call dept-first 
+(defun dept-first ()
+  (declare (special *open*)
+           (special *closed*)
+           (special *goal*)
+           (special *moves*))
+  (cond ((null *open*) nil)
+          (t (let ((state (car *open*)))
+		(format t "first open list:~a~a~%"(car *open*) (setq *count* (+ *count* 1))  )
+	   	 (cond ((equal state *goal*) 
+				(format t "Length of Closed:~a~%Length of Open:~a~%Solution path:~a~%  "    
+	       		        (Length *closed*) (Length *open*)(reverse *path*) )) 
+          		(t  (setq *path* (cons state *path*)) (setq *closed* (cons state *closed*)) 
+			    (setq *open* 
+                            (append 
+                                    (generate-descendants state *moves*)(cdr *open*) ))
+                      (dept-first)))))))
+
+;;code from https://www.cs.unm.edu/~luger/ai-final/code/LISP.breadth1.html
+;;Function that start the  breadth-frist-search by take the start state and goal state, also taking speical variable open list and closed list and goal.
+;;put start state into open list, goal state into goal and run the breadth-first function to start the search.
+(defun run-breadth (start goal)
+  (declare (special *open*)
+           (special *closed*)
+           (special *goal*))
+  (setq *open* (list start))
+  (setq *closed* nil)
+  (setq *goal* goal)
+  (breadth-first))
+
+;;code from https://www.cs.unm.edu/~luger/ai-final/code/LISP.breadth1.html, modification done.
+;;the breadth-first-search function,take speical variable open,closed,goal,and moves
+;;check if open list is empty, make current state the first state in open list.
+;;print out the iteration information and also setting count to increase by 1
+;;check if current state is goal state, if match, print the information (length of open and closed and solution path)
+;;if not,add current state to solution path, also in the closed list
+;;add child of the current state to the end of open list, recursively call breadth-first 
+(defun breadth-first ()
+  (declare (special *open*)
+           (special *closed*)
+           (special *goal*)
+           (special *moves*))
+  (cond ((null *open*) nil)
+          (t (let ((state (car *open*)))
+		(format t "first open list:~a~a~%"(car *open*) (setq *count* (+ *count* 1))  )
+				
+	   	 (cond ((equal state *goal*) 
+				(format t "Length of Closed:~a~%Length of Open:~a~%Solution path:~a~%  "    
+	       		        (Length *closed*) (Length *open*)(reverse *path*) )) 
+          		(t (setq *path* (cons state *path*)) (setq *closed* (cons state *closed*)) 
+		   	   (setq *open* 
+                            (append 
+                                   (cdr *open*)  (generate-descendants state *moves*)))
+                      (breadth-first)))))))
+
+
+
+
+CL-USER 1 > (run-dept '((1 1 1 1)(0 0 0 0)) '((0 0 0 0)(1 1 1 1)))
+first open list:((1 1 1 1) (0 0 0 0))1
+first open list:((0 1 0 1) (1 0 1 0))2
+first open list:((1 1 0 1) (0 0 1 0))3
+first open list:((0 0 0 1) (1 1 1 0))4
+first open list:((1 0 1 1) (0 1 0 0))5
+first open list:((0 0 1 0) (1 1 0 1))6
+first open list:((1 0 1 0) (0 1 0 1))7
+first open list:((0 0 0 0) (1 1 1 1))8
+Length of Closed:7
+Length of Open:3
+Solution path:(((1 1 1 1) (0 0 0 0)) ((0 1 0 1) (1 0 1 0)) 
+((1 1 0 1) (0 0 1 0)) ((0 0 0 1) (1 1 1 0)) ((1 0 1 1) (0 1 0 0)) 
+((0 0 1 0) (1 1 0 1)) ((1 0 1 0) (0 1 0 1)))
+
+CL-USER 3 : 2 > (run-breadth '((1 1 1 1)(0 0 0 0)) '((0 0 0 0)(1 1 1 1)))
+first open list:((1 1 1 1) (0 0 0 0))1
+first open list:((0 1 0 1) (1 0 1 0))2
+first open list:((1 1 0 1) (0 0 1 0))3
+first open list:((0 0 0 1) (1 1 1 0))4
+first open list:((0 1 0 0) (1 0 1 1))5
+first open list:((1 0 1 1) (0 1 0 0))6
+first open list:((1 1 1 0) (0 0 0 1))7
+first open list:((0 0 1 0) (1 1 0 1))8
+first open list:((1 0 1 0) (0 1 0 1))9
+first open list:((0 0 0 0) (1 1 1 1))10
+Length of Closed:9
+Length of Open:1
+Solution path:(((1 1 1 1) (0 0 0 0)) ((0 1 0 1) (1 0 1 0)) 
+((1 1 0 1) (0 0 1 0)) ((0 0 0 1) (1 1 1 0)) ((0 1 0 0) (1 0 1 1)) 
+((1 0 1 1) (0 1 0 0)) ((1 1 1 0) (0 0 0 1)) ((0 0 1 0) (1 1 0 1))
+((1 0 1 0) (0 1 0 1)))
+
+
+  
+  
+

@@ -1,0 +1,92 @@
+;;;;This is for the water jug puzzel. In this puzzle, the 5 gallons and 3 gallons jugs are represent by a list(ex. (0 0))
+The first atom is the list is the 5 gallons jug and the second atom is the 3 gallons jug. There are 6 moves for this puzzle, they are
+Filling up the 5 gallons, filling up the 3 gallons, emptying the 5 gallons jug and emptying the 3 gallons jug, pour water from 5g jug into 3g jug and
+pour water in 3g jug into 5g jug. So after any action, the list will update the value to represent the status of the two jugs. By starting with the state (0 0) 
+meaning both jugs are empty and goal state to be (4 0) mean 4 gallons in the 5 gallons jug which is the goal state. 
+
+
+
+;;moves for the water jug puzzle
+;;also path and counter
+(defparameter *moves* '(filla fillb emptya emptyb 3to5 5to3))
+(defparameter *path*  '() )							
+(defparameter *count* 0)
+
+;;The fill action which will fill up the 5 gallons jug. The condition if the jug is not already full.
+(defun filla(state)
+	(cond ((< (car state)5 )  (cons '5 (cdr state)))
+	(t nil)))
+
+;;Fill action for the 3 gallons jug, the condition is also if the jug is not already full yet.
+(defun fillb(state)
+	(cond ((< (cadr state)3 ) (list (car state) '3 ))
+	(t nil)))
+
+;;empty action for the 5 gallons jug, which will empty the jug and set it value to 0 in the list.
+;;condition is the jug is not already empty
+(defun emptya(state)
+	(cond (( > (car state) 0) (cons '0 (cdr state) ))
+	(t nil)))
+
+;;empty action for the 3 gallons jug, which will empty the jug and set it value to 0 in the list.
+;;condition is the jug is not already empty
+(defun emptyb(state)
+	(cond (( > (cadr state) 0) (list  (car state) '0  ) )
+	(t nil)))
+
+;;the pour action for the 5 gallons jug pouring into the 3 gallons jug, updating value for the action
+;;conidtion that the 5 gallons jug can't be empty(nothing to pour), the 3 gallons jug can't be full(can't pour into a full jug)
+(defun 5to3(state)
+	(cond
+	( (= (car state)0) nil)
+	( (= (cadr state)3) nil)
+	( (>= (- 3 (+ (car state) (cadr state))) 0) (list '0 (+ (car state) (cadr state)))) 
+	( t ( list (- (car state) (- '3 (cadr state))) '3))
+	))
+
+;;the pour action for the 3 gallons jug pouring into the 5 gallons jug, update value for both atom in the list
+;;conidtion that the 3 gallons jug can't be empty(nothing to pour), the 5 gallons jug can't be full(can't pour into a full jug)
+(defun 3to5(state)
+	(cond
+	( (= (car state)5) nil)
+	( (= (cadr state)0) nil)
+	( (>= (- 5 (+ (car state) (cadr state))) 0) (list (+ (car state) (cadr state)) '0 ))
+	( t   (list '5 ( - (cadr state) (- 5 (car state)) )))
+	))
+
+(run-dept '(0 0) '(4 0))
+first open list:(0 0)1
+first open list:(5 0)2
+first open list:(5 3)3
+first open list:(2 3)4
+first open list:(2 0)5
+first open list:(0 2)6
+first open list:(5 2)7
+first open list:(4 3)8
+first open list:(4 0)9
+Length of Closed:8
+Length of Open:2
+Solution path:((0 0) (5 0) (5 3) (2 3) (2 0) (0 2) (5 2) (4 3))
+
+(run-breadth '(0 0) '(4 0))
+first open list:(0 0)1
+first open list:(5 0)2
+first open list:(0 3)3
+first open list:(5 3)4
+first open list:(2 3)5
+first open list:(3 0)6
+first open list:(2 0)7
+first open list:(3 3)8
+first open list:(0 2)9
+first open list:(5 1)10
+first open list:(5 2)11
+first open list:(0 1)12
+first open list:(4 3)13
+first open list:(1 0)14
+first open list:(4 0)15
+Length of Closed:14
+Length of Open:2
+Solution path:
+((0 0) (5 0) (5 3) (2 3) (2 0) (0 2) (5 2) (4 3) (0 0) (5 0) (0 3) (5 3) (2 3)
+ (3 0) (2 0) (3 3) (0 2) (5 1) (5 2) (0 1) (4 3) (1 0))
+  

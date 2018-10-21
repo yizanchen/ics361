@@ -1,0 +1,14 @@
+	From exercises A and B which required us to use Prolog to do puzzle search, is more difficult than what I imagine. 
+At first, I though prolog will be easier compared to CLisp with puzzle searching because Prolog is built with depth-first search and 
+bepth-first search is good with puzzle solving. But it turn out or I don¡¯t know a better way, I have to write out rules for each different situations.
+That¡¯s mean I have to write rules about moving the block up, down, right and left to all 15 locations in the puzzle. 
+This is also the same with calculating the Manhattan Distance, or there is a good way I don¡¯t know. 
+I think Prolog is good at problems that can be represented in a small amount of rules. 
+But if you have a huge amount of database, then you can skip what I just said and Prolog will be a good choice and will save you time. 
+Prolog provides very simply, clean code if you learn it and many unique features that you can¡¯t find in another language. 
+	In exercise C, we are required to use CLisp to do the colored balls problem. 
+To solve this problem, we can do a search and a move sets of adding different colored balls. 
+But there are a lot of rules for different color ball and location of the ball, which will require a lot of thinking 
+and work to fit the rules into each function and move sets. This is much harder compared to just writing rules of what you can¡¯t have in Prolog. 
+I think CLisp is good at simply problems that have few rules, like the river crossing problem, where there are only 2 rules. 
+CLisp can train a person's brain to represent problems in a simpler way, representing a puzzle in a list or in numbers. 

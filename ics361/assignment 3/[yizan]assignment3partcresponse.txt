@@ -1,0 +1,17 @@
+The Manhattan distance heuristic perform wrost out of all three in the easy case, but it was close. Comparing to the default heurisitc, it perform better
+than the default.The manhattan distance calculate more value and take in account of move element into the heuristic, which making it strong. 
+Instead of just counting the out of position block, it also calcualte the distance they are away from their correct posistion in (x,y) index.
+But the problem is the Manhattan distance heuristic assume all blocks are indenpendent, so you can just move a block without making change to other block.
+But in the 8 puzzle game, moving one block will cause other block to move too, so after you calculate the heuristic for one state, then after one move,
+it can change the heuristic value dramtatically. So, this heuristic may not be the best to solve puzzle where block are indenpendent.
+In the diffcult case, it check three times less nodes to be able to find the goal and solution. I think it is more informed, 
+one reason is the h(x) value is bigger compared using the default h(x). A large h(x) mean more informed, if the h(x) don't out large the h*(x).
+
+My heuristic is addition to the default heuristic, so it should perform better than the default, also making it a bigger h(x). 
+I make node with more compete rolls to the top of the open list, because I know even if a node have half of it's block in the correct position,
+but all the correct blocks are separated, then they would get move from their correct position if you try to move other block.
+But comparing to a roll that is complete, you would rarely move the roll since it is complete than you can just do work in the lower position of the grild.
+Comparing to the Manhattan distance heuristic, my implment also perform better in both start state. One reason maybe because I use a combination of 
+heuristic, combine the default and my own compele roll to form one bigger heuristic, so it should atlest perform better than the default. Also,
+it have a bigger h(x) value, so it can find the better node to look at comparing to other nodes. It is still admissible, since the h(x) is not overly large
+and it shows in the example that it match the solution path that is the shortest path.

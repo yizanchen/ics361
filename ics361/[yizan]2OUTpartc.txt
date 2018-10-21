@@ -1,0 +1,58 @@
+	
+FOR FARMER,WOLF,GOAT,CABBAGE
+	For the farmer, Wolf, Goat and Cabbage?problem, the best strategy for this kind of problem is by graphing out the option you have. 
+And also keeping in mind that most river-crossing puzzle will require you to take something back from the other side of the river. 
+So, to start off with this problem, we know that Goat and Cabbage can't be in the same side without the farmer; Goat and Wolf can’t be in the same side without the farmer. 
+Now, we can see the relationship between each object, and the only way these object will be safe without the farmer is when Wolf and Cabbage are on the same side. 
+Wolf and Cabbage state is important and we should keep that in mind when thinking about our move, since it is the only safe state without Farmer. 
+Now understanding each state, we should try to move around the safe state and exploring available options. 
+	So, it will be clear that our only first move is to take the Goat across. 
+And then we have two options, one is to take Goat back, which return to the start state and that is a waste move. 
+And the other option is to return alone, which is the only option we can do since option one is just a waste move. 
+Now, we have two options not counting the waste move(farmer go back alone), one is to take Cabbage across and the other is to take Wolf across. 
+Both of them are safe move, so we can pick any of them. 
+Since the previous move doesn't matter, I will say we take the Cabbage across this time, and the result now is Farmer, Cabbage, Goat on one side and Wolf on the other side, 
+what is our available option now? Our only safe option is to either take Wolf back or take Goat back, but taking Wolf back is a waste move, so we have to take Goat back.
+ Now, we face the same problem, should we take Goat across or take Cabbage, and using the logic from previous move, our only option is to take Cabbage across. 
+Now, we have Farmer, Wolf, Cabbage on one side and only Goat on the other side, and farmer just have to go back and take Goat across to solve this puzzle. 
+
+FOR WATER JUGS
+	A successful strategy according to the online website for the Water Jugs puzzle is to make a representation in a math equation, mp+nq=k if q>p and q>k. 
+For example, if we were given two jugs, a 5 gallons jug and a 3 gallons jug, p would be 5 and q would be 3. 
+And the problem ask for 4 gallons, then k would be 4. 
+So now, try to think of a number for m and n that would make 5m+3n=4 true. 
+There can be many solution for this, and one solution could be 3x3 + (-1)x5 = 4 as example given from the website. 
+So, after we find the math representation of the problem and find values for n and m to make the equation.  
+n and m represent the number and what action we should do, with negative mean pour out and positive mean fill up. 
+To put in the preceptive of our example, we got n=3 and m=-1, which mean in order to get 4 gallons, we would perform 3 times fill up of the 3 gallons jug and 1 pour out for the 5 gallons jug
+But the order and the action of pouring into another jugs are not still unknown from the equation. 
+	Even though the equation don¡¯t give the full picture of solving the problem, but it is a good start and we can get very useful information from it. 
+To solve our example problem, we know we have to do 3 fill in the 3g(3 gallons) jug and 1 pour out in the 5g(5 gallons) jug. 
+If we think about it a little bit, we can see the solution to be filling up the 3g jug and pour them all in the 5g jug. 
+Then we fill up the 3g jug again and pour to the 5g jug until full, and since the 5g jug have 3 initially, it will take a additional 2 more gallons before full. 
+So, we can only pour 2 gallons in the 5g jug and leaving us with 1 gallons at the 3g jug. Now, we pour the full 5g jug out and pour the 1 gallons from 3g jug into the 5g jug. 
+Then we fill up the 3g jug again and pour it into the 5g jug, giving us 4 gallons.
+
+FOR 8 PUZZLE
+	There is no absolute successful strategy for 8 puzzle, because there are random start state. 
+But there are some good strategy to keep in mind while doing the puzzle. 
+First of them is to understand your goal state and keep in mind the position of each square. 
+his is important because if a roll or corner is correct and all the square fit in their goal state, don¡¯t move if necessary. 
+The second strategy from many people while solving this kind of puzzle is to work on a small part first, many said focusing on a smaller area help them solve the puzzle successfully. 
+This mean if we are work on a 8 puzzle, the strategy is to work on the first roll first or a 4 square corner first. 
+ork on small area and then combine together at the end is strategy I like personally. 
+The last strategy people use is to create chain of square, which mean for 8 puzzle, making 3 follow by 2 and 2 follow by 1. This strategy work best on bigger puzzle.
+
+How many different states are possible in the search space for each puzzle?
+	For the FWGC puzzle, there isn¡¯t much possible state to search, since about half of the state will not be safe and end up not in the search. 
+If we count the total state, including unsafe state, we will get 4x4 = 16 state, but there are unsafe state and repeat state, so the the amount of searchable state is 10. 
+
+	For the Water Jugs puzzle, the search state is hard to count and it depend on the size of both jugs.
+ If p and q represent the size of each jugs, and p > q and 2q !>p. We will have 3 status for p jug, full, empty and take the value of q from pouring. 
+Also, q jug will 3 status, there are full, empty and take the value after pouring into p. So, the searchable state is 3x3=9. 
+
+	For the 8 puzzle, it is even harder to count the searchable state, because the size of it. 
+So, there are 8 square and 1 blank, but we will also count the blank because it will create different state. 
+So, 9 different status for each square, which will give us 9!, but the interesting fact is, about half of those state are not possible. 
+Which mean you can¡¯t reach them in a normal 8 puzzle, and exactly half of them. So, the searchable space is (9!/2)=181440.
+

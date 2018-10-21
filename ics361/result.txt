@@ -1,0 +1,70 @@
+FWGC
+CL-USER 1 > (run-dept '((1 1 1 1)(0 0 0 0)) '((0 0 0 0)(1 1 1 1)))
+first open list:((1 1 1 1) (0 0 0 0))1
+first open list:((0 1 0 1) (1 0 1 0))2
+first open list:((1 1 0 1) (0 0 1 0))3
+first open list:((0 0 0 1) (1 1 1 0))4
+first open list:((1 0 1 1) (0 1 0 0))5
+first open list:((0 0 1 0) (1 1 0 1))6
+first open list:((1 0 1 0) (0 1 0 1))7
+first open list:((0 0 0 0) (1 1 1 1))8
+Length of Closed:7
+Length of Open:3
+Solution path:(((1 1 1 1) (0 0 0 0)) ((0 1 0 1) (1 0 1 0)) 
+((1 1 0 1) (0 0 1 0)) ((0 0 0 1) (1 1 1 0)) ((1 0 1 1) (0 1 0 0)) 
+((0 0 1 0) (1 1 0 1)) ((1 0 1 0) (0 1 0 1)))
+
+CL-USER 3 : 2 > (run-breadth '((1 1 1 1)(0 0 0 0)) '((0 0 0 0)(1 1 1 1)))
+first open list:((1 1 1 1) (0 0 0 0))1
+first open list:((0 1 0 1) (1 0 1 0))2
+first open list:((1 1 0 1) (0 0 1 0))3
+first open list:((0 0 0 1) (1 1 1 0))4
+first open list:((0 1 0 0) (1 0 1 1))5
+first open list:((1 0 1 1) (0 1 0 0))6
+first open list:((1 1 1 0) (0 0 0 1))7
+first open list:((0 0 1 0) (1 1 0 1))8
+first open list:((1 0 1 0) (0 1 0 1))9
+first open list:((0 0 0 0) (1 1 1 1))10
+Length of Closed:9
+Length of Open:1
+Solution path:(((1 1 1 1) (0 0 0 0)) ((0 1 0 1) (1 0 1 0)) 
+((1 1 0 1) (0 0 1 0)) ((0 0 0 1) (1 1 1 0)) ((0 1 0 0) (1 0 1 1)) 
+((1 0 1 1) (0 1 0 0)) ((1 1 1 0) (0 0 0 1)) ((0 0 1 0) (1 1 0 1))
+((1 0 1 0) (0 1 0 1)))
+
+
+WATERJUG
+first open list:(0 0)1
+first open list:(5 0)2
+first open list:(5 3)3
+first open list:(2 3)4
+first open list:(2 0)5
+first open list:(0 2)6
+first open list:(5 2)7
+first open list:(4 3)8
+first open list:(4 0)9
+Length of Closed:8
+Length of Open:2
+Solution path:((0 0) (5 0) (5 3) (2 3) (2 0) (0 2) (5 2) (4 3))
+
+first open list:(0 0)1
+first open list:(5 0)2
+first open list:(0 3)3
+first open list:(5 3)4
+first open list:(2 3)5
+first open list:(3 0)6
+first open list:(2 0)7
+first open list:(3 3)8
+first open list:(0 2)9
+first open list:(5 1)10
+first open list:(5 2)11
+first open list:(0 1)12
+first open list:(4 3)13
+first open list:(1 0)14
+first open list:(4 0)15
+Length of Closed:14
+Length of Open:2
+Solution path:
+((0 0) (5 0) (5 3) (2 3) (2 0) (0 2) (5 2) (4 3) (0 0) (5 0) (0 3) (5 3) (2 3)
+ (3 0) (2 0) (3 3) (0 2) (5 1) (5 2) (0 1) (4 3) (1 0))
+  

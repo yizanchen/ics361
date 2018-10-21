@@ -1,0 +1,455 @@
+;;;;This A* search code are from https://www.cs.unm.edu/~luger/ai-final/code/LISP.best.html. It is the simply heuristic that check atoms out of place.
+;;This function take the state and it's parent, dept and heuristic value and put them together into a single list.
+(defun build-record (state parent depth weight) 
+  (list state parent depth weight))
+;;this function call and start the heruistic-eval function
+(defun heuristic (state)
+  (declare (special *goal*))
+  (heuristic-eval state *goal*))
+;;this the main function for heuristic calculation, it compare the current state and the goal state recursively and count the number of atom out of place. 
+;;Add 1 store to the function if the comparing atom don't match. 
+ (defun heuristic-eval (state goal)
+ (cond ((null state) 0)
+        ((equal (car state) (car goal)) 
+        (heuristic-eval (cdr state) (cdr goal)))
+        (t (1+ (heuristic-eval (cdr state) (cdr goal))))))
+;;This function sort the children created in order based on their heuristic from low to high and call the insert function.
+(defun insert-by-weight (children sorted-list)
+  (cond ((null children) sorted-list)
+        (t (insert (car children) 
+           (insert-by-weight (cdr children) sorted-list)))))
+;;This is the insert function, it sort by comparing the heursitic value of the current child in the list and insert them based on their value.
+(defun insert (item sorted-list)
+  (cond ((null sorted-list) (list item))
+        ((< (get-weight item) (get-weight (car sorted-list)))
+         (cons item sorted-list))
+        (t (cons (car sorted-list) (insert item (cdr sorted-list))))))
+;;A simply function to get the current state in a node
+(defun get-state (state-tuple) (nth 0 state-tuple))
+;;A simply function to ge the parent of the current state in a node.
+(defun get-parent (state-tuple) (nth 1 state-tuple))
+;;A simply function to get the depth of a state in a node.
+(defun get-depth (state-tuple) (nth 2 state-tuple))
+;;A simply function to get the heuristic value of a state in a node.
+(defun get-weight (state-tuple) (nth 3 state-tuple))
+;;This function search for a state in a list, used for making the solution path.
+(defun retrieve-by-state (state list)
+  (cond ((null list) nil)
+        ((equal state (get-state (car list))) (car list))
+        (t (retrieve-by-state state (cdr list)))))
+;;This function create child of a state by calling all the moves from the problem and remove any exsiting state or used state if found.
+(defun generate-descendants (state depth moves)
+  (declare (special *closed*)
+           (special *open*))
+  (cond ((null moves) nil)
+        (t (let ((child (funcall (car moves) state))
+                 (rest (generate-descendants state depth (cdr moves))))
+             (cond ((null child) rest)
+                   ((retrieve-by-state child rest) rest)
+                   ((retrieve-by-state child *open*) rest)
+                   ((retrieve-by-state child *closed*) rest)
+                   (t (cons (build-record child state depth 
+                                          (+ depth (heuristic child))) 
+                            rest)))))))
+;;This is the function to create the solution path after a solution is found, it take the goal state and trace back to it's parent and up by 
+;;calling the retrieve-by-state function.
+(defun build-solution (state)
+  (declare (special *closed*))
+  (cond ((null state) nil)
+        (t (cons state (build-solution 
+                        (get-parent 
+                         (retrieve-by-state state *closed*)))))))
+;;This is the main function for the Astar search, it call to make child and compare them to the goal. Print result if goal found.
+(defun Astar ()
+  (declare (special *goal*)
+           (special *open*)
+           (special *closed*)
+           (special *moves*))
+  (format t "first nodes in open:~a~%" (car *open*))
+  (cond ((null *open*) nil)
+        (t (let ((state (car *open*)))
+             (setf *closed* (cons state *closed*))
+             (cond ((equal (get-state state) *goal*)(format t "Length of open:~a~%Length of closed:~a~%" (Length *open*)(Length *closed*)  ) (  format t "solution path:~a~%" (reverse (build-solution *goal*))))
+                   (t (setf *open* 
+                            (insert-by-weight 
+                                    (generate-descendants (get-state state)
+                                                          (1+ (get-depth state))
+                                                          *moves*)
+                                    (cdr *open*)))
+                      (Astar)))))))
+;;This is the start function of the Astar search, it take the goal and start state and call Aster function.
+(defun run-star (start goal)
+  (declare (special *goal*)
+           (special *open*)
+           (special *closed*))
+  (setf *goal* goal)
+  (setf *open* (list (build-record start nil 0 (heuristic start))))
+  (setf *closed* nil)
+  (Aster))
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+;;;;This is for the FWGC puzzle and very similar from assignment 2, each state is represent with a list. Farmer is the first atom in list, Wolf is second atom in the list, Goat is the third atom in the list, Cabbage is the last atom in the list.
+;;;;And I represent two side of the river with two lists and using 1 to represent their present in their location and 0 if they are not present. For example, the state state is
+;;;;((1 1 1 1)(0 0 0 0)), in here the 4 1s in the first list each represent the Farmer, wolf, goat and cabbage with their position in the list. And the second list with 4 0s represent
+;;;;the Farmer, Wolf, Goat and cabbage are not present on the other side of the river. So, our goal state is ((0 0 0 0)(1 1 1 1)), which mean every one is at the other side of the river.
+;;;;So, when we input our state state and end state to begin the search, the start state will be the current state and child state will generate using the legal moves from the puzzle.
+;;;;The moves are listed in the *moves* and each of them represent a action in the puzzle. After the child state are gererated, it will check to if the goal state is satisfie, else it will 
+;;;;keep performing moves to generate more child and search for the goal state. There are also, some dead state, each time a child is generate, it will check if the child is a dead state 
+;;;;and return nil if child is a dead state. 
+
+;;define world variable to store moves, solution path and a counter for iteration. Moves are setted variable, so no change will be made and it will be call later in the code to generate child.
+(defparameter *moves* '(getself takeself takewolf getwolf takegoat getgoat takecabbage getcabbage))
+
+;;A move function represent the farmer return form the other side of the river alone, so it will add 1 to the first atom in first list, meaning farmer present in the one side on the river
+;;and it will minus 1 from the other side of the river, which represent by the first atom in the second list, since the farmer is going back alone, so he should not present in the other side of the river.
+;;function will not run if farmer is on the left side of the river, since it is not possible to go back to the left if he is already in the left side. This is done with checking if 
+;;the first atom in the first list is 1. And after the math is done, it will combine back to become a readable state, "list" and "cons" in the second part of the code.
+;;In the function it also check if this will generate a dead state, which what the "check" before "cond" is, it is a function that check for dead state, it is in the later part of the code. 
+(defun getself(state)
+	(check (cond
+	((eq (caar state)1) nil)
+	(t (list (cons (+(caar state)1) (cdar state))
+		 (cons (-(caadr state)1) (cdadr state)) )))))
+
+;;A move function represent the farmer acrossing the river alone, so minus one in the first atom in the first list. Add one to the first atom in the second list.
+;;also check if farmer exist on the left side of river, dead state, combine together to form reabable state at the end.
+(defun takeself(state)
+	(check (cond
+	((eq (caar state)0) nil)
+	(t (list (cons (-(caar state)1) (cdar state))
+                 (cons (+(caadr state)1) (cdadr state)))))))
+
+;;A move function represent the farmer taking the wolf back from the right side of the river, add one in both farmer and wolf location of the left list and minus one in the second list.
+;;Also check if farmer and wolf exist on same side of the right side river, dead state, combine together to form reabable state at the end
+(defun getwolf(state)
+	(check (cond
+	((or (eq (caar state)1) (eq (cadar state) 1)) nil)
+	(t(list (cons (+(caar state)1) (cons (+(cadar state)1) (cddar state)))
+		(cons (-(caadr state)1)(cons (-(cadadr state)1) (cddadr state)))  )))))
+
+;;A move funtion represent the farmer crossing the river with the wolf from left side of the river to the right side. So minus one in both farmer and wolf location of the left list and minus one in the second list.
+;;Also check if farmer and wolf exist on same side of the left side river, dead state, combine together to form reabable state at the end.
+(defun takewolf(state)								
+	(check (cond
+	((or (eq (caar state)0) (eq (cadar state) 0)) nil)
+	(t(list (cons (-(caar state)1) (cons (-(cadar state)1) (cddar state)))
+		(cons (+(caadr state)1)(cons (+(cadadr state)1) (cddadr state)))  )))))
+
+;;A move function represent the farmer crossing the river with goat, so change status on their location.
+;;check for exist on same side, dead state, combine together to form reabable state at the end.
+(defun takegoat(state)
+	(check(cond
+	((or (eq (caar state) 0) (eq (caddar state) 0)) nil)
+	(t(list (cons (-(caar state)1) (cons (cadar state) (cons (-(caddar state)1) (cdddr(car state)))))
+	        (cons (+(caadr state)1) (cons (cadadr state) (cons (+(caddar(cdr state))1) (cdddr (cadr state)))))  )))))
+
+;;A move function represent the farmer returning the river with goat, so change status on their location.
+;;check for exist on same side, dead state, combine together to form reabable state at the end.
+(defun getgoat(state)
+	(check(cond
+	((or (eq (caar state) 1) (eq (caddar state) 1)) nil)
+	(t(list (cons (+(caar state)1) (cons (cadar state) (cons (+(caddar state)1) (cdddr(car state)))))
+	        (cons (-(caadr state)1) (cons (cadadr state) (cons (-(caddar(cdr state))1) (cdddr (cadr state)))))  )))))
+
+;;A move function represent the farmer crossing the river with cabbage, so change status on their location.
+;;check for exist on same side, dead state, combine together to form reabable state at the end.
+(defun takecabbage(state)
+	(check(cond
+	((or (eq (caar state)0) (eq (cadddr(car state )) 0)) nil)
+	(t(list (cons (-(caar state)1) (cons (cadar state) (list (caddar state) (-(cadddr(car state))1 ))))
+	        (cons (+(caadr state)1) (cons (cadadr state) (list (caddar(cdr state)) (+(cadddr (cadr state))1 ))))  )))))
+
+;;A move function represent the farmer returning the river with cabbage, so change status on their location.
+;;check for exist on same side, dead state, combine together to form reabable state at the end.
+(defun getcabbage(state)
+	(check(cond
+	((or (eq (caar state)1) (eq (cadddr(car state )) 1)) nil)
+	(t(list (cons (+(caar state)1) (cons (cadar state) (list (caddar state) (+(cadddr(car state))1 ))))
+	        (cons (-(caadr state)1) (cons (cadadr state) (list (caddar(cdr state)) (-(cadddr (cadr state))1 ))))  )))))
+
+;;A function to check if the state is legal, to prevent goat eat cabbage and wolf eat goat. 
+;;it will check for these dead position in both side of the list in a state, meaning either of the river can't have goat eat caabage or wolf eat goat.
+;;return the state if it don't have any of the dead poistion and return nil, which will cancel the state if state is dead.
+(defun check (state)
+	(cond
+	((and (equal (find '(0 0 1 1)  state :test #'equal ) nil )
+	      (equal (find '(0 1 1 1)  state :test #'equal ) nil )
+	      (equal (find '(0 1 1 0)  state :test #'equal ) nil )   ) state )
+	(t nil )))
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+;;;;This is for the water jug puzzel, similiar code from assginment 2. In this puzzle, the 5 gallons and 3 gallons jugs are represent by a list(ex. (0 0))
+The first atom is the list is the 5 gallons jug and the second atom is the 3 gallons jug. There are 6 moves for this puzzle, they are
+Filling up the 5 gallons, filling up the 3 gallons, emptying the 5 gallons jug and emptying the 3 gallons jug, pour water from 5g jug into 3g jug and
+pour water in 3g jug into 5g jug. So after any action, the list will update the value to represent the status of the two jugs. By starting with the state (0 0) 
+meaning both jugs are empty and goal state to be (4 0) mean 4 gallons in the 5 gallons jug which is the goal state. 
+
+;;moves for the water jug puzzle
+;;also path and counter
+(defparameter *moves* '(filla fillb emptya emptyb 3to5 5to3))
+
+;;The fill action which will fill up the 5 gallons jug. The condition if the jug is not already full.
+(defun filla(state)
+	(cond ((< (car state)5 )  (cons '5 (cdr state)))
+	(t nil)))
+
+;;Fill action for the 3 gallons jug, the condition is also if the jug is not already full yet.
+(defun fillb(state)
+	(cond ((< (cadr state)3 ) (list (car state) '3 ))
+	(t nil)))
+
+;;empty action for the 5 gallons jug, which will empty the jug and set it value to 0 in the list.
+;;condition is the jug is not already empty
+(defun emptya(state)
+	(cond (( > (car state) 0) (cons '0 (cdr state) ))
+	(t nil)))
+
+;;empty action for the 3 gallons jug, which will empty the jug and set it value to 0 in the list.
+;;condition is the jug is not already empty
+(defun emptyb(state)
+	(cond (( > (cadr state) 0) (list  (car state) '0  ) )
+	(t nil)))
+
+;;the pour action for the 5 gallons jug pouring into the 3 gallons jug, updating value for the action
+;;conidtion that the 5 gallons jug can't be empty(nothing to pour), the 3 gallons jug can't be full(can't pour into a full jug)
+(defun 5to3(state)
+	(cond
+	( (= (car state)0) nil)
+	( (= (cadr state)3) nil)
+	( (>= (- 3 (+ (car state) (cadr state))) 0) (list '0 (+ (car state) (cadr state)))) 
+	( t ( list (- (car state) (- '3 (cadr state))) '3))
+	))
+
+;;the pour action for the 3 gallons jug pouring into the 5 gallons jug, update value for both atom in the list
+;;conidtion that the 3 gallons jug can't be empty(nothing to pour), the 5 gallons jug can't be full(can't pour into a full jug)
+(defun 3to5(state)
+	(cond
+	( (= (car state)5) nil)
+	( (= (cadr state)0) nil)
+	( (>= (- 5 (+ (car state) (cadr state))) 0) (list (+ (car state) (cadr state)) '0 ))
+	( t   (list '5 ( - (cadr state) (- 5 (car state)) )))
+	))
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+;;;;This is for the 8 puzzle, the puzzle by a list, for example, (1 2 3 4 5 6 7 8 0) is (1 2 3   where the 0 is the blank square. 
+											 4 5 6
+											 7 8 0)
+;;;;There are 4 moves for this puzzle, moving the blank square, which is 0 in this case, up ,down ,right and left. Which is switching location with the block in that number.
+;;;;So each move take a state and produce the end state matching the result of the moves in the game as a list state. 
+;;set moves to the correct moves set
+(defparameter *moves* '(nup ndown nleft nright))
+
+;;Function return r1 = roll 1, r2 = roll 2, r3 = roll 3, of the state
+;;Function return c1 = column 1, c2 = column 2, c3 = column 3, of the state
+(defun r1(state)
+     (list (car state) (cadr state) (caddr state)))
+(defun r2(state)
+    (list (nth 3 state) (nth 4 state) (nth 5 state)))
+(defun r3(state)
+    (list (nth 6 state) (nth 7 state) (nth 8 state)))
+(defun c1(state)
+    (list (nth 0 state) (nth 3 state) (nth 6 state)))
+(defun c2(state)
+    (list (nth 1 state) (nth 4 state) (nth 7 state)))
+(defun c3(state)
+    (list (nth 2 state) (nth 5 state) (nth 8 state)))
+
+;;This is move function of donw, exchange place depend on the position of the blank(0)
+(defun ndown(state)
+    (cond
+        (  (member '0 (r3 state)) nil )
+        (  (member '0 (r1 state)) 
+            (cond 
+                ( (eq (position '0 state) 0) 
+                   (list 
+                   (nth 3 state) (nth 1 state) (nth 2 state)
+                   (nth 0 state) (nth 4 state) (nth 5 state) 
+                   (nth 6 state) (nth 7 state) (nth 8 state) ))
+                ( (eq (position '0 state) 1)
+                   (list 
+                   (nth 0 state) (nth 4 state) (nth 2 state)
+                   (nth 3 state) (nth 1 state) (nth 5 state) 
+                   (nth 6 state) (nth 7 state) (nth 8 state) ))
+                (t (list 
+                   (nth 0 state) (nth 1 state) (nth 5 state)
+                   (nth 3 state) (nth 4 state) (nth 2 state) 
+                   (nth 6 state) (nth 7 state) (nth 8 state) )))) 
+        (  (member '0 (r2 state))
+             (cond 
+                ( (eq (position '0 state) 3) 
+                   (list 
+                   (nth 0 state) (nth 1 state) (nth 2 state)
+                   (nth 6 state) (nth 4 state) (nth 5 state) 
+                   (nth 3 state) (nth 7 state) (nth 8 state) ))
+                ( (eq (position '0 state) 4)
+                   (list 
+                   (nth 0 state) (nth 1 state) (nth 2 state)
+                   (nth 3 state) (nth 7 state) (nth 5 state) 
+                   (nth 6 state) (nth 4 state) (nth 8 state) ))
+                (t (list 
+                   (nth 0 state) (nth 1 state) (nth 2 state)
+                   (nth 3 state) (nth 4 state) (nth 8 state) 
+                   (nth 6 state) (nth 7 state) (nth 5 state) ))))))
+
+;;This is the move function of up, change the list depend on the location of the blank(0)
+(defun nup(state)
+    (cond
+        (  (member '0 (r1 state)) nil )
+        (  (member '0 (r2 state)) 
+            (cond 
+                ( (eq (position '0 state) 3) 
+                   (list 
+                   (nth 3 state) (nth 1 state) (nth 2 state)
+                   (nth 0 state) (nth 4 state) (nth 5 state) 
+                   (nth 6 state) (nth 7 state) (nth 8 state) ))
+                ( (eq (position '0 state) 4)
+                   (list 
+                   (nth 0 state) (nth 4 state) (nth 2 state)
+                   (nth 3 state) (nth 1 state) (nth 5 state) 
+                   (nth 6 state) (nth 7 state) (nth 8 state) ))
+                (t (list
+                   (nth 0 state) (nth 1 state) (nth 5 state)
+                   (nth 3 state) (nth 4 state) (nth 2 state) 
+                   (nth 6 state) (nth 7 state) (nth 8 state) )))) 
+        (  (member '0 (r3 state))
+             (cond 
+                ( (eq (position '0 state) 6) 
+                   (list 
+                   (nth 0 state) (nth 1 state) (nth 2 state)
+                   (nth 6 state) (nth 4 state) (nth 5 state) 
+                   (nth 3 state) (nth 7 state) (nth 8 state) ))
+                ( (eq (position '0 state) 7)
+                   (list 
+                   (nth 0 state) (nth 1 state) (nth 2 state)
+                   (nth 3 state) (nth 7 state) (nth 5 state) 
+                   (nth 6 state) (nth 4 state) (nth 8 state) ))
+                (t (list 
+                   (nth 0 state) (nth 1 state) (nth 2 state)
+                   (nth 3 state) (nth 4 state) (nth 8 state) 
+                   (nth 6 state) (nth 7 state) (nth 5 state) ))))))    
+
+;;This is the move function for left, move left depend on the position of the blank(0)
+(defun nleft(state)
+    (cond
+        ( (member '0 (c1 state)) nil)
+        ( (member '0 (c2 state))
+                (cond 
+                ( (eq (position '0 state) 1) 
+                   (list 
+                   (nth 1 state) (nth 0 state) (nth 2 state)
+                   (nth 3 state) (nth 4 state) (nth 5 state) 
+                   (nth 6 state) (nth 7 state) (nth 8 state) ))
+                ( (eq (position '0 state) 4)
+                   (list 
+                   (nth 0 state) (nth 1 state) (nth 2 state)
+                   (nth 4 state) (nth 3 state) (nth 5 state) 
+                   (nth 6 state) (nth 7 state) (nth 8 state) ))
+                (t (list 
+                   (nth 0 state) (nth 1 state) (nth 2 state)
+                   (nth 3 state) (nth 4 state) (nth 5 state) 
+                   (nth 7 state) (nth 6 state) (nth 8 state) ))))
+         ( (member '0 (c3 state))
+              (cond 
+                ( (eq (position '0 state) 2) 
+                   (list 
+                   (nth 0 state) (nth 2 state) (nth 1 state)
+                   (nth 3 state) (nth 4 state) (nth 5 state) 
+                   (nth 6 state) (nth 7 state) (nth 8 state) ))
+                ( (eq (position '0 state) 5)
+                   (list 
+                   (nth 0 state) (nth 1 state) (nth 2 state)
+                   (nth 3 state) (nth 5 state) (nth 4 state) 
+                   (nth 6 state) (nth 7 state) (nth 8 state) ))
+                (t (list 
+                   (nth 0 state) (nth 1 state) (nth 2 state)
+                   (nth 3 state) (nth 4 state) (nth 5 state) 
+                   (nth 6 state) (nth 8 state) (nth 7 state) ))))))
+
+;;This is the move function for right, move right depend on the position of blank(0)
+(defun nright(state)
+    (cond
+        ( (member '0 (c3 state)) nil)
+        ( (member '0 (c1 state))
+                (cond 
+                ( (eq (position '0 state) 0) 
+                   (list 
+                   (nth 1 state) (nth 0 state) (nth 2 state)
+                   (nth 3 state) (nth 4 state) (nth 5 state) 
+                   (nth 6 state) (nth 7 state) (nth 8 state) ))
+                ( (eq (position '0 state) 3)
+                   (list 
+                   (nth 0 state) (nth 1 state) (nth 2 state)
+                   (nth 4 state) (nth 3 state) (nth 5 state) 
+                   (nth 6 state) (nth 7 state) (nth 8 state) ))
+                (t (list 
+                   (nth 0 state) (nth 1 state) (nth 2 state)
+                   (nth 3 state) (nth 4 state) (nth 5 state) 
+                   (nth 7 state) (nth 6 state) (nth 8 state) ))))
+         ( (member '0 (c2 state))
+              (cond 
+                ( (eq (position '0 state) 1) 
+                   (list 
+                   (nth 0 state) (nth 2 state) (nth 1 state)
+                   (nth 3 state) (nth 4 state) (nth 5 state) 
+                   (nth 6 state) (nth 7 state) (nth 8 state) ))
+                ( (eq (position '0 state) 4)
+                   (list 
+                   (nth 0 state) (nth 1 state) (nth 2 state)
+                   (nth 3 state) (nth 5 state) (nth 4 state) 
+                   (nth 6 state) (nth 7 state) (nth 8 state) ))
+                (t (list 
+                   (nth 0 state) (nth 1 state) (nth 2 state)
+                   (nth 3 state) (nth 4 state) (nth 5 state) 
+                   (nth 6 state) (nth 8 state) (nth 7 state) ))))))
+
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+;;;;This is the Manhattan Distance heuristic.
+;;This function return the x,y index of the atom in the list.
+defun getindex(a)
+    (cond
+        ( (eq a 0) (list '1 '1))
+        ( (eq a 1) (list '1 '2))
+        ( (eq a 2) (list '1 '3))
+        ( (eq a 3) (list '2 '1))
+        ( (eq a 4) (list '2 '2))
+        ( (eq a 5) (list '2 '3))
+        ( (eq a 6) (list '3 '1))
+        ( (eq a 7) (list '3 '2))
+        ( (eq a 8) (list '3 '3))))
+
+;;This function take the index of state and goal and calculate the value for the heuristic. h=|x1-x2|+|y1-y2|
+(defun Mand(index1 index2)
+    (+ (abs(- (car index1)(car index2))) (abs(- (cadr index1)(cadr index2)) )))
+
+;;This is the new heuristic function that will replace the one in the Astar.
+;;it will call to take the value and add all the value together and divide by 2 because we are counting them twice.
+ (defun heuristic-eval (state goal)
+ (cond ((null state) 0)
+        ((equal (car state) (car goal)) 
+        (heuristic-eval (cdr state) (cdr goal)))
+        (t  (+ (heuristic-eval (cdr state) (cdr goal)) (mand (getindex(car state)) (getindex(car goal)))))))
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+;;;;This my own heuristic, I value correct group block more than a correct block that is alone. So, my heuristic will give low score to a state that have a complete roll and solving them first.
+;;This a set of roll functions to call during heuristic calculation
+(defvar *hset* '(r1 r2 r3))
+
+;;This is my heuristic function to calculate the value and check how complete the state is, add 4 for every roll that is not complete.
+(defun myh (state set)
+    (cond
+        ( (null set) '0)
+        ( (equal (funcall (car set) state) (funcall (car set) *goal* )) (myh state (cdr set)))
+        (t (+ 4 (myh state (cdr set)) ))
+        )
+    )
+
+;;I also modify the heuristic function, which will replace the one in the search code, because I want to use two heuristic at the same time to be better.
+(defun heuristic (state)
+  (declare (special *goal*))
+  (+ (heuristic-eval state *goal*) (myh state *hset*)))

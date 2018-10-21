@@ -1,0 +1,31 @@
+?- top([did,mark,hamill,play,spock]).
+Sorry, that's false.
+?- top([did,william,shatner,play,luke,skywalker]).
+Sorry, that's false.
+?- top([mark,hamill,play,luke,skywalker,right]).
+Yes, that's true.
+?- top([did,mark,hamill,play,spock,in,star,trek,iii]).
+Sorry, that's false.
+?- top([did,william,shatner,direct,star,wars,i]).
+Sorry, that's false.
+?- top([is,it,true,that,william,shatner,is,an,actor]).
+Yes, that's true.
+?- top([is,it,true,that,william,shatner,is,an,actor,and,mark,hamill,is,a,director]).
+Sorry, that's false.
+?- top([william,shatner,is,a,director,,,mark,hamill,is,an,actor,and,leonard,nimoy,is,an,actor,right]).
+Sorry, that's false.
+?- top([who,is,the,actor,for,spock]).
+The person you're looking for is Leonard Nimoy.
+?- top([what,is,the,title,of,star,wars,ii]).
+The title you're looking for is Attack Of The Clones?
+?- top([who,is,the,director,of,star,wars,ii]).
+The person you're looking for is George Lucas
+?- top([who,is,the,character,of,william,shatner]).
+The person you're looking for is Captain James Kirk.
+
+
+#1, Names are capitalized and separated with space.
+#2, Using only last name is okay. No title or with title([captain,kirk] or [james,kirk] are both okay).
+ex: ?-top([who,is,the,character,of,shatner]). 
+    The person you're looking for is Captain James Kirk.
+#3, Will reply "Sorry, I don't understand" for incorrect or off topic input.
